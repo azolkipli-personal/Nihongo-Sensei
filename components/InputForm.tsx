@@ -1,23 +1,14 @@
 import React, { useState, useRef } from 'react';
-import type { LLMConfig } from './LLMSelector';
 
-interface InputFormProps {
-  onGenerate: (words: string[], scenario: string) => void;
-  isLoading: boolean;
-  llmConfig: LLMConfig;
-}
+const InputForm = ({ onGenerate, isLoading, llmConfig }) => {
+  const [inputType, setInputType] = useState('manual');
+  const [word, setWord] = useState('よろしくお願いします');
+  const [scenario, setScenario] = useState('work conversations in a IT engineering company');
+  const [fileWords, setFileWords] = useState([]);
+  const [fileName, setFileName] = useState('');
+  const fileInputRef = useRef(null);
 
-type InputType = 'manual' | 'file';
-
-const InputForm: React.FC<InputFormProps> = ({ onGenerate, isLoading, llmConfig }) => {
-  const [inputType, setInputType] = useState<InputType>('manual');
-  const [word, setWord] = useState<string>('よろしくお願いします');
-  const [scenario, setScenario] = useState<string>('work conversations in a IT engineering company');
-  const [fileWords, setFileWords] = useState<string[]>([]);
-  const [fileName, setFileName] = useState<string>('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const parseWords = (text: string): string[] => {
+  const parseWords = (text) => {
     if (!text) return [];
     return text
       .split(/[\n,]+/) // Split by one or more newlines or commas
@@ -25,7 +16,7 @@ const InputForm: React.FC<InputFormProps> = ({ onGenerate, isLoading, llmConfig 
       .filter(Boolean); // Remove any empty strings
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     const wordsToGenerate = inputType === 'manual' ? parseWords(word) : fileWords;
     if (wordsToGenerate.length > 0 && scenario.trim() && !isLoading) {
@@ -33,14 +24,14 @@ const InputForm: React.FC<InputFormProps> = ({ onGenerate, isLoading, llmConfig 
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     setFileName(file.name);
     const reader = new FileReader();
     reader.onload = (e) => {
-      const text = e.target?.result as string;
+      const text = e.target?.result;
       const words = parseWords(text);
       setFileWords(words);
     };
@@ -59,7 +50,9 @@ const InputForm: React.FC<InputFormProps> = ({ onGenerate, isLoading, llmConfig 
     isLoading ||
     (inputType === 'file' && fileWords.length === 0) ||
     (inputType === 'manual' && !word.trim()) ||
-    (llmConfig.service === 'ollama' && !llmConfig.ollamaModel);
+    (llmConfig.service === 'ollama' && !llmConfig.ollamaModel) ||
+    (llmConfig.service === 'gemini' && !llmConfig.geminiApiKey);
+
 
   const tabStyle = "px-4 py-2 text-sm font-medium rounded-t-lg transition-colors focus:outline-none";
   const activeTabStyle = "bg-white border-slate-200 border-l border-t border-r -mb-px text-primary";
@@ -134,8 +127,11 @@ const InputForm: React.FC<InputFormProps> = ({ onGenerate, isLoading, llmConfig 
           >
             {isLoading ? 'Generating...' : 'Generate Examples'}
           </button>
-          {llmConfig.service === 'ollama' && !llmConfig.ollamaModel && !isLoading && (
-            <p className="text-xs text-center text-amber-700 mt-2">Please fetch and select an Ollama model above before generating.</p>
+          {!isLoading && (llmConfig.service === 'ollama' && !llmConfig.ollamaModel) && (
+            <p className="text-xs text-center text-amber-700 mt-2">Please select an Ollama model in Settings before generating.</p>
+          )}
+           {!isLoading && (llmConfig.service === 'gemini' && !llmConfig.geminiApiKey) && (
+            <p className="text-xs text-center text-amber-700 mt-2">Please enter your Google Gemini API key in Settings before generating.</p>
           )}
         </div>
       </form>
