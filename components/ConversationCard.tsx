@@ -1,7 +1,15 @@
 import React from 'react';
+import type { Conversation } from '../types';
+
+interface ConversationCardProps {
+  conversation: Conversation;
+  index: number;
+  showRomaji: boolean;
+  showEnglish: boolean;
+}
 
 // This component parses a string with furigana annotations and renders it using <ruby> tags.
-const Furigana = ({ text }) => {
+const Furigana: React.FC<{ text: string }> = ({ text }) => {
   // Regex to find patterns like `漢字[かんじ]` or `食[た]べます`
   const regex = /([\u4e00-\u9faf]+)\[(.+?)\]/g;
   const parts = [];
@@ -28,7 +36,7 @@ const Furigana = ({ text }) => {
 };
 
 
-const ConversationCard = ({ conversation, index, showRomaji, showEnglish }) => {
+const ConversationCard: React.FC<ConversationCardProps> = ({ conversation, index, showRomaji, showEnglish }) => {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden transition-shadow hover:shadow-xl">
       <div className="bg-secondary text-white p-4">

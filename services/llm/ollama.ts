@@ -1,19 +1,35 @@
-export const fetchOllamaModels = async (url) => {
+import type { LearningResult } from '../../types';
+
+interface OllamaTagsResponse {
+    models: {
+        name: string;
+        // other properties exist but we only need name
+    }[];
+}
+
+interface OllamaGenerateResponse {
+    response: string; // This will be the JSON string
+    done: boolean;
+    // other properties exist
+}
+
+
+export const fetchOllamaModels = async (url: string): Promise<string[]> => {
     const response = await fetch(new URL('/api/tags', url));
     if (!response.ok) {
         throw new Error(`Failed to fetch models from Ollama. Status: ${response.status}`);
     }
-    const data = await response.json();
+    const data: OllamaTagsResponse = await response.json();
     return data.models.map(model => model.name);
 };
 
 
 export const generateWithOllama = async (
-    model, 
-    word, 
-    scenario, 
-    url
-) => {
+    model: string, 
+    word: string, 
+    scenario: string, 
+    url: string
+): Promise<LearningResult> => {
     const prompt = `
     You are an expert Japanese language teacher.
     Your student wants to learn the word/phrase: "${word}".
@@ -52,7 +68,7 @@ export const generateWithOllama = async (
             throw new Error(`Ollama API request failed with status ${response.status}`);
         }
 
-        const result = await response.json();
+        const result: OllamaGenerateResponse = await response.json();
         
         // The 'response' field from Ollama contains the full JSON string
         const parsedResult = JSON.parse(result.response);
@@ -61,7 +77,7 @@ export const generateWithOllama = async (
             throw new Error("Invalid response structure from Ollama model.");
         }
 
-        return parsedResult;
+        return parsedResult as LearningResult;
 
     } catch (error) {
         console.error("Error generating content from Ollama API:", error);

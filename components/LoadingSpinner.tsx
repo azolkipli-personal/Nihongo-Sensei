@@ -1,6 +1,10 @@
 import React from 'react';
 
-const LoadingSpinner = ({ message }) => {
+interface LoadingSpinnerProps {
+  message?: string | null;
+}
+
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ message }) => {
   return (
     <div className="flex flex-col justify-center items-center p-8">
       <svg

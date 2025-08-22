@@ -1,7 +1,14 @@
 import React from 'react';
+import type { LearningResult } from '../types';
 import ConversationCard from './ConversationCard';
 
-const ResultDisplay = ({ result, showRomaji, showEnglish }) => {
+interface ResultDisplayProps {
+  result: LearningResult;
+  showRomaji: boolean;
+  showEnglish: boolean;
+}
+
+const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, showRomaji, showEnglish }) => {
   return (
     <div className="mt-12 w-full max-w-4xl mx-auto space-y-8">
       <div className="bg-white p-8 rounded-lg shadow-lg relative">

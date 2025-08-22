@@ -1,16 +1,16 @@
 import React, { useState, useRef } from 'react';
+import type { LearningResult } from '../types';
 import ResultDisplay from './ResultDisplay';
 
-const ReviewPage = () => {
-  const [reviewedResults, setReviewedResults] = useState<any[] | null>(null);
+const ReviewPage: React.FC = () => {
+  const [reviewedResults, setReviewedResults] = useState<LearningResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [showRomaji, setShowRomaji] = useState(true);
-  const [showEnglish, setShowEnglish] = useState(true);
+  const [showRomaji, setShowRomaji] = useState<boolean>(true);
+  const [showEnglish, setShowEnglish] = useState<boolean>(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const isValidLearningResult = (obj: any): boolean => {
+  const isValidLearningResult = (obj: any): obj is LearningResult => {
       return (
-          obj &&
           typeof obj.meaning === 'string' &&
           typeof obj.wordDetails === 'object' &&
           obj.wordDetails !== null &&
@@ -27,19 +27,12 @@ const ReviewPage = () => {
 
     setError(null);
     setReviewedResults(null);
-    const loadedResults: any[] = [];
+    const loadedResults: LearningResult[] = [];
 
     const readFile = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = (e) => {
-              const result = e.target?.result;
-              if (typeof result === 'string') {
-                resolve(result);
-              } else {
-                reject(new Error(`Failed to read file ${file.name} as text.`));
-              }
-            };
+            reader.onload = (e) => resolve(e.target?.result as string);
             reader.onerror = () => reject(new Error(`Error reading file ${file.name}`));
             reader.readAsText(file);
         });

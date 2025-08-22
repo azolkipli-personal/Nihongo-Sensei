@@ -1,57 +1,29 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import InputForm from './components/InputForm';
 import ResultDisplay from './components/ResultDisplay';
 import LoadingSpinner from './components/LoadingSpinner';
 import ReviewPage from './components/ReviewPage';
-import SettingsSidebar from './components/SettingsSidebar';
+import LLMSelector, { LLMConfig } from './components/LLMSelector';
 
 import { generateWithGemini } from './services/llm/gemini';
 import { generateWithOllama } from './services/llm/ollama';
 
-const App = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState(null);
-  const [error, setError] = useState(null);
-  const [results, setResults] = useState(null);
-  const [currentPage, setCurrentPage] = useState('generator');
-  
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [settings, setSettings] = useState({
-    service: 'gemini',
-    geminiApiKey: '',
-    geminiModel: 'gemini-2.5-flash',
-    ollamaModel: '',
-    ollamaUrl: 'http://localhost:11434',
-  });
+import type { LearningResult } from './types';
 
-  const [showRomaji, setShowRomaji] = useState(true);
-  const [showEnglish, setShowEnglish] = useState(true);
+type Page = 'generator' | 'review';
+
+const App: React.FC = () => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [results, setResults] = useState<LearningResult[] | null>(null);
+  const [currentPage, setCurrentPage] = useState<Page>('generator');
+  const [llmConfig, setLlmConfig] = useState<LLMConfig>({ service: 'gemini' });
+  const [showRomaji, setShowRomaji] = useState<boolean>(true);
+  const [showEnglish, setShowEnglish] = useState<boolean>(true);
   const isCancelledRef = useRef(false);
-  
-  useEffect(() => {
-    try {
-        const savedSettings = localStorage.getItem('kaiwa-renshuu-settings');
-        if (savedSettings) {
-            const parsedSettings = JSON.parse(savedSettings);
-            // Ensure new settings have defaults if not in storage
-            setSettings(prev => ({...prev, ...parsedSettings}));
-        }
-    } catch (e) {
-        console.error("Failed to parse settings from localStorage", e);
-    }
-  }, []);
-
-  const handleSaveSettings = (newSettings) => {
-    setSettings(newSettings);
-    try {
-        localStorage.setItem('kaiwa-renshuu-settings', JSON.stringify(newSettings));
-    } catch (e) {
-        console.error("Failed to save settings to localStorage", e);
-    }
-    setIsSettingsOpen(false);
-  };
 
   const handleStop = () => {
     isCancelledRef.current = true;
@@ -61,7 +33,7 @@ const App = () => {
   const handleExportAll = () => {
     if (!results || results.length === 0) return;
 
-    const slugify = (text) => {
+    const slugify = (text: string) => {
       return text
         .toLowerCase()
         .trim()
@@ -86,36 +58,34 @@ const App = () => {
     URL.revokeObjectURL(url);
   };
 
-  const handleGenerate = async (words, scenario) => {
-    if (settings.service === 'gemini' && !settings.geminiApiKey) {
-        setError("Gemini is selected, but the API Key is missing. Please add it in the Settings sidebar.");
-        return;
-    }
-    if (settings.service === 'ollama' && (!settings.ollamaUrl || !settings.ollamaModel)) {
-      setError("Ollama is selected, but the server URL is missing or no model is selected. Please configure it in Settings.");
+  const handleGenerate = async (words: string[], scenario: string) => {
+    // Validation check before starting
+    if (llmConfig.service === 'ollama' && (!llmConfig.ollamaUrl || !llmConfig.ollamaModel)) {
+      setError("Ollama is selected, but the server URL is missing or no model is selected. Please configure it first.");
       return;
     }
     
-    isCancelledRef.current = false;
+    isCancelledRef.current = false; // Reset cancellation flag on new generation
     setIsLoading(true);
     setError(null);
-    setResults([]);
+    setResults([]); // Clear previous results
 
     for (let i = 0; i < words.length; i++) {
       if (isCancelledRef.current) {
         setError(prevError => (prevError ? `${prevError}\n` : '') + 'Generation stopped by user.');
-        break;
+        break; // Exit the loop if cancelled
       }
 
       const word = words[i];
       try {
         setLoadingMessage(words.length > 1 ? `Generating ${i + 1} of ${words.length}: "${word}"` : `Generating content for "${word}"...`);
 
-        let generatedResult;
-        if (settings.service === 'gemini') {
-            generatedResult = await generateWithGemini(settings.geminiModel, word, scenario, settings.geminiApiKey);
+        let generatedResult: LearningResult;
+        if (llmConfig.service === 'gemini') {
+            generatedResult = await generateWithGemini(word, scenario);
         } else {
-            generatedResult = await generateWithOllama(settings.ollamaModel, word, scenario, settings.ollamaUrl);
+            // Config is validated before loop, so these should exist
+            generatedResult = await generateWithOllama(llmConfig.ollamaModel!, word, scenario, llmConfig.ollamaUrl!);
         }
         
         setResults(prevResults => [...(prevResults || []), generatedResult]);
@@ -137,20 +107,15 @@ const App = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      <Header currentPage={currentPage} setCurrentPage={setCurrentPage} onOpenSettings={() => setIsSettingsOpen(true)} />
-      <SettingsSidebar 
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        onSave={handleSaveSettings}
-        currentSettings={settings}
-      />
+      <Header currentPage={currentPage} setCurrentPage={setCurrentPage} />
       <main className="flex-grow container mx-auto p-4 md:p-8">
         {currentPage === 'generator' && (
           <>
-            <InputForm onGenerate={handleGenerate} isLoading={isLoading} llmConfig={settings} />
+            <LLMSelector onConfigChange={setLlmConfig} isLoading={isLoading} />
+            <InputForm onGenerate={handleGenerate} isLoading={isLoading} llmConfig={llmConfig} />
 
             {isLoading && (
-              <div className="text-center mt-8">
+              <div className="text-center">
                 <LoadingSpinner message={loadingMessage} />
                 <button
                     onClick={handleStop}

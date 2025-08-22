@@ -1,4 +1,12 @@
 import { GoogleGenAI, Type } from "@google/genai";
+import type { LearningResult } from '../../types';
+
+const API_KEY = process.env.API_KEY;
+
+let ai: GoogleGenAI | null = null;
+if (API_KEY) {
+  ai = new GoogleGenAI({ apiKey: API_KEY });
+}
 
 const responseSchema = {
   type: Type.OBJECT,
@@ -59,12 +67,10 @@ const responseSchema = {
 };
 
 
-export const generateWithGemini = async (model, word, scenario, apiKey) => {
-    if (!apiKey) {
-        throw new Error("Google Gemini API key is not configured. Please set it in the settings.");
+export const generateWithGemini = async (word: string, scenario: string): Promise<LearningResult> => {
+    if (!ai) {
+        throw new Error("Google Gemini API key is not configured. Please set the API_KEY environment variable.");
     }
-
-    const ai = new GoogleGenAI({ apiKey });
     
   const prompt = `
     You are an expert Japanese language teacher.
@@ -83,7 +89,7 @@ export const generateWithGemini = async (model, word, scenario, apiKey) => {
 
   try {
     const response = await ai.models.generateContent({
-      model: model || "gemini-2.5-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -99,7 +105,7 @@ export const generateWithGemini = async (model, word, scenario, apiKey) => {
         throw new Error("Invalid response structure from API.");
     }
 
-    return parsedResult;
+    return parsedResult as LearningResult;
 
   } catch (error) {
     console.error("Error generating content from Gemini API:", error);
