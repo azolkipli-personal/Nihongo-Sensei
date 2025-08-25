@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { fetchOllamaModels } from '../services/llm/ollama';
 
 const SettingsSidebar = ({ isOpen, onClose, onSave, currentSettings }) => {
@@ -6,6 +6,8 @@ const SettingsSidebar = ({ isOpen, onClose, onSave, currentSettings }) => {
   const [ollamaModels, setOllamaModels] = useState([]);
   const [isFetchingModels, setIsFetchingModels] = useState(false);
   const [fetchError, setFetchError] = useState(null);
+  const [importError, setImportError] = useState(null);
+  const fileInputRef = useRef(null);
 
   // A list of recommended Gemini models for this application
   const geminiModelOptions = [
@@ -50,6 +52,63 @@ const SettingsSidebar = ({ isOpen, onClose, onSave, currentSettings }) => {
       setFetchError("Could not connect to Ollama server at the specified URL.");
     } finally {
       setIsFetchingModels(false);
+    }
+  };
+
+  const handleExportSettings = () => {
+    setImportError(null);
+    try {
+        const jsonString = JSON.stringify(settings, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'kaiwa-renshuu-settings.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error("Failed to export settings:", error);
+        setImportError("An error occurred during export.");
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImportError(null);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        try {
+            const text = event.target?.result;
+            if (typeof text !== 'string') {
+                throw new Error("Could not read file content.");
+            }
+            const importedSettings = JSON.parse(text);
+
+            if (importedSettings && importedSettings.service && ['gemini', 'ollama'].includes(importedSettings.service)) {
+                // Merge with current settings to ensure all keys exist
+                setSettings(prev => ({...prev, ...importedSettings}));
+            } else {
+                throw new Error("Invalid or incomplete settings file.");
+            }
+        } catch (err) {
+            setImportError(err instanceof Error ? err.message : "Failed to parse the JSON file.");
+        }
+    };
+    reader.onerror = () => {
+        setImportError("Error reading the file.");
+    }
+    reader.readAsText(file);
+
+    if (fileInputRef.current) {
+        fileInputRef.current.value = '';
     }
   };
 
@@ -167,13 +226,38 @@ const SettingsSidebar = ({ isOpen, onClose, onSave, currentSettings }) => {
                         </div>
                     )}
                 </div>
-                <footer className="p-4 border-t bg-white">
+                <footer className="p-4 border-t bg-white space-y-3">
                     <button
                         onClick={handleSave}
                         className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-primary hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                     >
                         Save and Close
                     </button>
+                    <div className="flex gap-3">
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            accept=".json,application/json"
+                            className="hidden"
+                            aria-hidden="true"
+                        />
+                        <button
+                            onClick={handleImportClick}
+                            type="button"
+                            className="w-full py-2 px-4 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                        >
+                            Import Settings
+                        </button>
+                        <button
+                            onClick={handleExportSettings}
+                            type="button"
+                            className="w-full py-2 px-4 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                        >
+                            Export Settings
+                        </button>
+                    </div>
+                    {importError && <p className="text-xs text-center text-red-600">{importError}</p>}
                 </footer>
             </div>
         </div>
