@@ -69,9 +69,15 @@ const App = () => {
         .replace(/\s+/g, '-')
         .slice(0, 50);
     };
+    
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const day = String(now.getDate()).padStart(2, '0');
+    const datePrefix = `${year}${month}${day}`;
 
     const firstWordSlug = slugify(results[0].wordDetails.romaji || 'session');
-    const fileName = `kaiwa-renshuu-session-${firstWordSlug}.json`;
+    const fileName = `${datePrefix}-kaiwa-renshuu-session-${firstWordSlug}.json`;
 
     const jsonString = JSON.stringify(results, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });

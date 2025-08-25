@@ -10,6 +10,7 @@ const SettingsSidebar = ({ isOpen, onClose, onSave, currentSettings }) => {
   // A list of recommended Gemini models for this application
   const geminiModelOptions = [
     'gemini-2.5-flash',
+    'gemini-2.0-flash',
   ];
 
   useEffect(() => {
