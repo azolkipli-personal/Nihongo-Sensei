@@ -24,7 +24,7 @@ export const generateWithOllama = async (
 
     The JSON object must contain these exact keys: "wordDetails", "meaning", and "conversations".
     1.  "wordDetails": An object containing the "kanji" (original form), "kana" (reading), and "romaji" writings of "${word}".
-    2.  "meaning": A clear and concise English definition of "${word}".
+    2.  "meaning": A clear and concise English definition of "${word}", specifically explaining its nuance and usage within the context of the provided scenario: "${scenario}".
     3.  "conversations": An array of EXACTLY 5 distinct, practical, and natural-sounding example conversations using "${word}" in the context of "${scenario}".
         - Each object in the "conversations" array must have a "title" and a "dialogue" array.
         - Each object in the "dialogue" array must have "speaker", "japanese", "romaji", and "english" keys.

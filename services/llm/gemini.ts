@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 
 const responseSchema = {
@@ -24,7 +25,7 @@ const responseSchema = {
     },
     meaning: {
       type: Type.STRING,
-      description: "The detailed English meaning of the Japanese word/phrase.",
+      description: "The detailed English meaning of the Japanese word/phrase, contextualized for the given scenario.",
     },
     conversations: {
       type: Type.ARRAY,
@@ -59,12 +60,10 @@ const responseSchema = {
 };
 
 
-export const generateWithGemini = async (model, word, scenario, apiKey) => {
-    if (!apiKey) {
-        throw new Error("Google Gemini API key is not configured. Please set it in the settings.");
-    }
-
-    const ai = new GoogleGenAI({ apiKey });
+// Fix: Updated to use process.env.API_KEY exclusively and added parameter types
+export const generateWithGemini = async (model: string, word: string, scenario: string) => {
+  // Guidelines: The API key must be obtained exclusively from the environment variable process.env.API_KEY.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
     
   const prompt = `
     You are an expert Japanese language teacher.
@@ -73,7 +72,7 @@ export const generateWithGemini = async (model, word, scenario, apiKey) => {
 
     Your task is to provide the following in a structured JSON format:
     1.  **wordDetails**: An object containing the kanji, kana, and romaji writings of "${word}".
-    2.  **meaning**: A clear and concise English definition of "${word}".
+    2.  **meaning**: A clear and concise English definition of "${word}", specifically explaining its nuance and usage within the context of the provided scenario: "${scenario}".
     3.  **conversations**: Exactly 5 distinct, practical, and natural-sounding example conversations that demonstrate how to use "${word}" within the specified scenario: "${scenario}".
     
     IMPORTANT: For each 'japanese' dialogue line, provide furigana for all kanji using the format 'BaseKanji[reading]'.
@@ -83,7 +82,7 @@ export const generateWithGemini = async (model, word, scenario, apiKey) => {
 
   try {
     const response = await ai.models.generateContent({
-      model: model || "gemini-2.5-flash",
+      model: model || "gemini-3-flash-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -92,8 +91,9 @@ export const generateWithGemini = async (model, word, scenario, apiKey) => {
       },
     });
 
-    const jsonText = response.text.trim();
-    const parsedResult = JSON.parse(jsonText);
+    // Fix: Accessing .text property directly (not a method) as per guidelines
+    const jsonText = response.text || "";
+    const parsedResult = JSON.parse(jsonText.trim());
     
     if (!parsedResult.wordDetails || !parsedResult.meaning || !Array.isArray(parsedResult.conversations)) {
         throw new Error("Invalid response structure from API.");
