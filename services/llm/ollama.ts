@@ -1,3 +1,4 @@
+
 export const fetchOllamaModels = async (url) => {
     const response = await fetch(new URL('/api/tags', url));
     if (!response.ok) {
@@ -12,12 +13,14 @@ export const generateWithOllama = async (
     model, 
     word, 
     scenario, 
-    url
+    url,
+    cefrLevel
 ) => {
     const prompt = `
     You are an expert Japanese language teacher.
     Your student wants to learn the word/phrase: "${word}".
     The context for learning is the following scenario: "${scenario}".
+    The target Japanese proficiency level is CEFR: "${cefrLevel}".
 
     Your task is to provide a JSON object that follows a specific structure.
     Respond with ONLY the raw JSON object, without any surrounding text, explanations, or markdown formatting like \`\`\`json.
@@ -29,7 +32,11 @@ export const generateWithOllama = async (
         - Each object in the "conversations" array must have a "title" and a "dialogue" array.
         - Each object in the "dialogue" array must have "speaker", "japanese", "romaji", and "english" keys.
     
-    IMPORTANT RULE: For each "japanese" dialogue line, you MUST provide furigana for all kanji using the format 'BaseKanji[reading]'.
+    PROFICIENCY RULES:
+    - All Japanese dialogue MUST align with the "${cefrLevel}" CEFR proficiency level.
+    - Adjust vocabulary and grammar complexity to match "${cefrLevel}".
+
+    FORMATTING RULE: For each "japanese" dialogue line, you MUST provide furigana for all kanji using the format 'BaseKanji[reading]'.
     For example, '日本語が話せます' should be formatted as '日[に]本[ほん]語[ご]が話[はな]せます'.
     Kana-only words or particles should not have brackets.
     `;
@@ -43,8 +50,8 @@ export const generateWithOllama = async (
             body: JSON.stringify({
                 model,
                 prompt,
-                stream: false, // We want a single response object
-                format: 'json', // Instruct Ollama to ensure the output is valid JSON
+                stream: false,
+                format: 'json',
             }),
         });
         
@@ -53,8 +60,6 @@ export const generateWithOllama = async (
         }
 
         const result = await response.json();
-        
-        // The 'response' field from Ollama contains the full JSON string
         const parsedResult = JSON.parse(result.response);
         
         if (!parsedResult.wordDetails || !parsedResult.meaning || !Array.isArray(parsedResult.conversations)) {

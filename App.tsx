@@ -31,7 +31,6 @@ const App = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settings, setSettings] = useState({
     service: 'gemini',
-    // Fix: Removed geminiApiKey from state to comply with exclusive process.env.API_KEY guideline
     geminiModel: 'gemini-3-flash-preview',
     ollamaModel: '',
     ollamaUrl: 'http://localhost:11434',
@@ -48,7 +47,6 @@ const App = () => {
         const savedSettings = localStorage.getItem('kaiwa-renshuu-settings');
         if (savedSettings) {
             const parsedSettings = JSON.parse(savedSettings);
-            // Ensure API key is never stored or used from localStorage
             const { geminiApiKey, ...rest } = parsedSettings;
             setSettings(prev => ({...prev, ...rest}));
         }
@@ -76,7 +74,6 @@ const App = () => {
   }, [settings.colorTheme]);
 
   const handleSaveSettings = (newSettings: any) => {
-    // Guidelines: Do not manage API key in UI. Ensure it's stripped during save.
     const { geminiApiKey, ...safeSettings } = newSettings;
     setSettings(safeSettings);
     try {
@@ -130,7 +127,7 @@ const App = () => {
     URL.revokeObjectURL(url);
   };
 
-  const handleGenerate = async (words: string[], scenario: string) => {
+  const handleGenerate = async (words: string[], scenario: string, cefrLevel: string) => {
     if (settings.service === 'ollama' && (!settings.ollamaUrl || !settings.ollamaModel)) {
       setError("Ollama is selected, but the server URL is missing or no model is selected. Please configure it in Settings.");
       return;
@@ -153,10 +150,9 @@ const App = () => {
 
         let generatedResult;
         if (settings.service === 'gemini') {
-            // Fix: API key is now strictly handled inside the service via process.env.API_KEY
-            generatedResult = await generateWithGemini(settings.geminiModel, word, scenario);
+            generatedResult = await generateWithGemini(settings.geminiModel, word, scenario, cefrLevel);
         } else {
-            generatedResult = await generateWithOllama(settings.ollamaModel, word, scenario, settings.ollamaUrl);
+            generatedResult = await generateWithOllama(settings.ollamaModel, word, scenario, settings.ollamaUrl, cefrLevel);
         }
         
         setResults(prevResults => [...(prevResults || []), generatedResult]);
@@ -242,7 +238,6 @@ const App = () => {
               </div>
             )}
             {results && results.length > 0 && results.map((result, index) => (
-              // Fix: Added proper key prop and ensured ResultDisplay is correctly typed on line 246
               <ResultDisplay 
                 key={index} 
                 result={result} 

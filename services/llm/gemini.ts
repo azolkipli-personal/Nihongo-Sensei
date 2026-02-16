@@ -60,24 +60,29 @@ const responseSchema = {
 };
 
 
-// Fix: Updated to use process.env.API_KEY exclusively and added parameter types
-export const generateWithGemini = async (model: string, word: string, scenario: string) => {
-  // Guidelines: The API key must be obtained exclusively from the environment variable process.env.API_KEY.
+export const generateWithGemini = async (model: string, word: string, scenario: string, cefrLevel: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
     
   const prompt = `
     You are an expert Japanese language teacher.
     Your student wants to learn the word/phrase: "${word}".
     The context for learning is the following scenario: "${scenario}".
+    The target Japanese proficiency level is CEFR: "${cefrLevel}".
 
     Your task is to provide the following in a structured JSON format:
     1.  **wordDetails**: An object containing the kanji, kana, and romaji writings of "${word}".
     2.  **meaning**: A clear and concise English definition of "${word}", specifically explaining its nuance and usage within the context of the provided scenario: "${scenario}".
     3.  **conversations**: Exactly 5 distinct, practical, and natural-sounding example conversations that demonstrate how to use "${word}" within the specified scenario: "${scenario}".
     
-    IMPORTANT: For each 'japanese' dialogue line, provide furigana for all kanji using the format 'BaseKanji[reading]'.
-    For example, '日本語が話せます' should be formatted as '日[に]本[ほん]語[ご]が話[はな]せます'.
-    Kana-only words should not have brackets.
+    IMPORTANT PROFICIENCY RULES:
+    - All conversations, vocabulary selection, and sentence complexity MUST strictly align with the "${cefrLevel}" CEFR level.
+    - For lower levels (A1-A2), use simpler grammar and common words.
+    - For higher levels (B2-C2), use more nuanced, formal, or specialized language appropriate for the scenario.
+
+    IMPORTANT FORMATTING RULES:
+    - For each 'japanese' dialogue line, provide furigana for all kanji using the format 'BaseKanji[reading]'.
+    - For example, '日本語が話せます' should be formatted as '日[に]本[ほん]語[ご]が話[はな]せます'.
+    - Kana-only words should not have brackets.
   `;
 
   try {
@@ -91,7 +96,6 @@ export const generateWithGemini = async (model: string, word: string, scenario: 
       },
     });
 
-    // Fix: Accessing .text property directly (not a method) as per guidelines
     const jsonText = response.text || "";
     const parsedResult = JSON.parse(jsonText.trim());
     

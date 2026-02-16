@@ -5,9 +5,19 @@ const InputForm = ({ onGenerate, isLoading, llmConfig }) => {
   const [inputType, setInputType] = useState('manual');
   const [word, setWord] = useState('よろしくお願いします');
   const [scenario, setScenario] = useState('work conversations in a IT engineering company');
+  const [cefrLevel, setCefrLevel] = useState('B1');
   const [fileWords, setFileWords] = useState([]);
   const [fileName, setFileName] = useState('');
   const fileInputRef = useRef(null);
+
+  const cefrLevels = [
+    { value: 'A1', label: 'A1 - Beginner' },
+    { value: 'A2', label: 'A2 - Elementary' },
+    { value: 'B1', label: 'B1 - Intermediate' },
+    { value: 'B2', label: 'B2 - Upper Intermediate' },
+    { value: 'C1', label: 'C1 - Advanced' },
+    { value: 'C2', label: 'C2 - Mastery' },
+  ];
 
   const parseWords = (text) => {
     if (!text) return [];
@@ -21,7 +31,7 @@ const InputForm = ({ onGenerate, isLoading, llmConfig }) => {
     e.preventDefault();
     const wordsToGenerate = inputType === 'manual' ? parseWords(word) : fileWords;
     if (wordsToGenerate.length > 0 && scenario.trim() && !isLoading) {
-      onGenerate(wordsToGenerate, scenario);
+      onGenerate(wordsToGenerate, scenario, cefrLevel);
     }
   };
 
@@ -47,7 +57,6 @@ const InputForm = ({ onGenerate, isLoading, llmConfig }) => {
     }
   }
 
-  // Fix: Removed geminiApiKey validation requirement as it's now handled via process.env
   const isSubmitDisabled = 
     isLoading ||
     (inputType === 'file' && fileWords.length === 0) ||
@@ -106,19 +115,36 @@ const InputForm = ({ onGenerate, isLoading, llmConfig }) => {
             </div>
         )}
 
-        <div>
-          <label htmlFor="scenario" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Scenario / Context (for all words)
-          </label>
-          <input
-            type="text"
-            id="scenario"
-            value={scenario}
-            onChange={(e) => setScenario(e.target.value)}
-            placeholder="e.g., Leaving the office for the day"
-            className="w-full px-4 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-lg bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:placeholder-slate-400"
-            required
-          />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="md:col-span-3">
+            <label htmlFor="scenario" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Scenario / Context
+            </label>
+            <input
+              type="text"
+              id="scenario"
+              value={scenario}
+              onChange={(e) => setScenario(e.target.value)}
+              placeholder="e.g., Leaving the office for the day"
+              className="w-full px-4 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-lg bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:placeholder-slate-400"
+              required
+            />
+          </div>
+          <div className="md:col-span-1">
+            <label htmlFor="cefr" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              CEFR Level
+            </label>
+            <select
+              id="cefr"
+              value={cefrLevel}
+              onChange={(e) => setCefrLevel(e.target.value)}
+              className="w-full px-4 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-lg bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+            >
+              {cefrLevels.map(lvl => (
+                <option key={lvl.value} value={lvl.value}>{lvl.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
         <div>
           <button
