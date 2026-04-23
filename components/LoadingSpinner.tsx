@@ -1,29 +1,56 @@
 import React from 'react';
+import { motion } from 'motion/react';
+import { Sparkles } from 'lucide-react';
 
-const LoadingSpinner = ({ message }) => {
+interface LoadingSpinnerProps {
+  message?: string;
+}
+
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ message }) => {
   return (
-    <div className="flex flex-col justify-center items-center p-8">
-      <svg
-        className="animate-spin h-10 w-10 text-primary"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        ></circle>
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        ></path>
-      </svg>
-      {message && <p className="mt-4 text-lg text-slate-600 dark:text-slate-300 animate-pulse">{message}</p>}
+    <div className="flex flex-col justify-center items-center p-12 min-h-[300px]">
+      <div className="relative">
+        <motion.div
+          animate={{
+            rotate: 360,
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            rotate: { duration: 2, repeat: Infinity, ease: "linear" },
+            scale: { duration: 1, repeat: Infinity, ease: "easeInOut" }
+          }}
+          className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary shadow-lg shadow-primary/20"
+        />
+        <motion.div
+          animate={{
+            opacity: [0.3, 1, 0.3],
+            scale: [0.8, 1.2, 0.8],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute inset-0 flex items-center justify-center text-primary"
+        >
+          <Sparkles className="w-6 h-6" />
+        </motion.div>
+      </div>
+      
+      {message && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-8 text-center"
+        >
+          <p className="text-lg font-medium text-slate-900 dark:text-white">
+            {message}
+          </p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 uppercase tracking-widest font-bold animate-pulse">
+            Generating your lesson...
+          </p>
+        </motion.div>
+      )}
     </div>
   );
 };

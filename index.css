@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-jp: "Noto Sans JP", sans-serif;
+  --font-serif: "Libre Baskerville", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-primary: var(--color-primary-hex, #38bdf8);
+  --color-secondary: var(--color-secondary-hex, #2c3e50);
+  --color-accent: var(--color-accent-hex, #FFC107);
+  --color-light: var(--color-light-hex, #e0f2fe);
+  --color-background: var(--color-background-hex, #f0fdf4);
+}
+
+@layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  body {
+    @apply bg-background text-slate-900 transition-colors duration-500 selection:bg-primary/20 selection:text-primary antialiased;
+  }
+  
+  .dark body {
+    @apply bg-background text-slate-100;
+  }
+
+  .dark .card-modern {
+    @apply bg-slate-900/50 border-slate-800/50 shadow-none;
+  }
+
+  .dark .glass {
+    @apply bg-slate-950/80 border-slate-800/50;
+  }
+
+  input, textarea, select {
+    @apply text-slate-900 dark:text-white;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-800/20 shadow-xl;
+  }
+  
+  .card-modern {
+    @apply bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200/60 dark:border-slate-800/60 overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 hover:border-primary/20;
+  }
+  
+  .btn-modern-base {
+    @apply px-8 py-3 rounded-2xl font-bold transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2;
+  }
+  
+  .btn-primary {
+    @apply px-8 py-3 rounded-2xl font-bold transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 bg-primary text-white shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:bg-primary/90;
+  }
+  
+  .btn-secondary {
+    @apply px-8 py-3 rounded-2xl font-bold transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/50 dark:border-slate-700/50;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-slate-900 to-slate-500 dark:from-white dark:to-slate-400;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 dark:bg-slate-800 rounded-full hover:bg-slate-300 dark:hover:bg-slate-700 border-4 border-transparent bg-clip-padding;
+}
