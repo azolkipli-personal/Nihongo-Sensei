@@ -70,11 +70,6 @@ const Header = ({ currentPage, setCurrentPage, onOpenSettings }) => {
               >
                   <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" />
               </button>
-              
-              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                <Command className="w-3 h-3" />
-                <span>K</span>
-              </div>
             </div>
         </div>
       </div>
