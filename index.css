@@ -2,7 +2,7 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-jp: "Noto Sans JP", sans-serif;
+  --font-jp: "Yu Gothic", "YuGothic", "Noto Sans JP", sans-serif;
   --font-serif: "Libre Baskerville", serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   

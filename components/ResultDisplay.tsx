@@ -60,32 +60,28 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, showRomaji, showE
               </div>
             </div>
             
-            <div className="flex flex-col lg:flex-row lg:items-end gap-6 lg:gap-12">
-              <h3 className="text-6xl sm:text-7xl font-black font-jp text-slate-900 dark:text-white tracking-tighter leading-none">
+            <div className="flex flex-wrap items-baseline gap-4 sm:gap-6">
+              <h3 className="text-5xl sm:text-6xl font-black font-jp text-slate-900 dark:text-white tracking-tighter leading-none">
                 {wordDetails.kanji}
               </h3>
-              <div className="flex flex-col gap-1 pb-2">
-                <p className="text-2xl sm:text-3xl text-slate-400 dark:text-slate-500 font-jp font-bold">
-                  {wordDetails.kana}
+              <p className="text-2xl sm:text-3xl text-slate-400 dark:text-slate-500 font-jp font-bold">
+                {wordDetails.kana}
+              </p>
+              {showRomaji && (
+                <p className="text-lg sm:text-xl text-primary/60 font-mono font-bold tracking-[0.1em]">
+                  {wordDetails.romaji}
                 </p>
-                {showRomaji && (
-                  <p className="text-lg sm:text-xl text-primary/60 font-mono font-bold tracking-[0.1em]">
-                    {wordDetails.romaji}
-                  </p>
-                )}
-              </div>
+              )}
             </div>
 
-            {showEnglish && (
-              <div className="flex items-start gap-6 max-w-4xl">
-                <div className="mt-1 p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400">
-                  <Languages className="w-5 h-5" />
-                </div>
-                <p className="text-xl sm:text-2xl text-slate-700 dark:text-slate-200 font-serif italic leading-tight tracking-tight">
-                  {meaning}
-                </p>
+            <div className="flex items-start gap-4 max-w-4xl">
+              <div className="mt-0.5 p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400">
+                <Languages className="w-4 h-4" />
               </div>
-            )}
+              <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 font-serif italic leading-relaxed tracking-tight">
+                {meaning}
+              </p>
+            </div>
           </div>
         </div>
 

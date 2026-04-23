@@ -17,7 +17,7 @@ const Furigana = ({ text }: { text: string }) => {
     parts.push(
       <ruby key={match.index} className="group/kanji relative inline-flex flex-col-reverse items-center align-bottom">
         <span className="relative z-10">{kanji}</span>
-        <rt className="text-[0.45em] text-primary/40 font-black tracking-tighter mb-0.5 group-hover/kanji:text-primary group-hover/kanji:scale-110 transition-all duration-300">
+        <rt className="text-[0.45em] text-primary/40 font-black tracking-tighter mb-0.5 group-hover/kanji:text-primary group-hover/kanji:scale-110 transition-all duration-300 select-none">
           {furigana}
         </rt>
       </ruby>
@@ -81,26 +81,26 @@ const ConversationCard: React.FC<ConversationCardProps> = ({ conversation, showR
               </div>
             </div>
             
-            <div className="flex-grow space-y-3">
+            <div className="flex-grow space-y-4 pt-1">
               <div className="flex items-center gap-3">
                 <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] bg-primary/5 px-2 py-0.5 rounded-md">
                   {line.speaker}
                 </span>
               </div>
               
-              <div className="font-jp text-slate-800 dark:text-slate-100 text-xl sm:text-2xl leading-[1.6] tracking-tight">
+              <div className="font-jp text-slate-800 dark:text-slate-100 text-3xl sm:text-4xl leading-[1.6] tracking-tight">
                 <Furigana text={line.japanese} />
               </div>
               
               {(showRomaji || showEnglish) && (
-                <div className="space-y-2 pt-1">
+                <div className="space-y-4 pt-2">
                   {showRomaji && (
-                    <p className="text-sm text-slate-400 dark:text-slate-500 font-medium italic tracking-wide font-mono">
+                    <p className="text-lg sm:text-xl text-slate-400 dark:text-slate-500 font-medium italic tracking-widest font-mono">
                       {line.romaji}
                     </p>
                   )}
                   {showEnglish && (
-                    <p className="text-base text-slate-600 dark:text-slate-400 font-serif italic leading-relaxed opacity-80 group-hover/line:opacity-100 transition-opacity">
+                    <p className="text-xl sm:text-2xl text-slate-600 dark:text-slate-400 font-serif italic leading-relaxed opacity-80 group-hover/line:opacity-100 transition-opacity">
                       {line.english}
                     </p>
                   )}

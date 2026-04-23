@@ -17,7 +17,6 @@ const SettingsSidebar = ({ isOpen, onClose, onSave, currentSettings }) => {
     'gemini-3-flash-preview',
     'gemini-2.5-flash-preview',
     'gemini-flash-latest',
-    'gemma-4-31b'
   ];
 
   useEffect(() => {
