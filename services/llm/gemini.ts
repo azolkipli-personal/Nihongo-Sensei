@@ -60,8 +60,21 @@ const responseSchema = {
 };
 
 
+let aiClient: GoogleGenAI | null = null;
+
+function getAiClient(): GoogleGenAI {
+  if (!aiClient) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is not defined in the environment. Please check your settings.");
+    }
+    aiClient = new GoogleGenAI({ apiKey });
+  }
+  return aiClient;
+}
+
 export const generateWithGemini = async (model: string, word: string, scenario: string, cefrLevel: string) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+  const ai = getAiClient();
     
   const prompt = `
     You are an expert Japanese language teacher.
@@ -86,8 +99,9 @@ export const generateWithGemini = async (model: string, word: string, scenario: 
   `;
 
   try {
+    const genModel = model || "gemini-flash-latest";
     const response = await ai.models.generateContent({
-      model: model || "gemini-3-flash-preview",
+      model: genModel,
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -96,7 +110,11 @@ export const generateWithGemini = async (model: string, word: string, scenario: 
       },
     });
 
-    const jsonText = response.text || "";
+    if (!response.text) {
+      throw new Error("Empty response from AI model. This might be due to safety filters or a model error.");
+    }
+
+    const jsonText = response.text;
     const parsedResult = JSON.parse(jsonText.trim());
     
     if (!parsedResult.wordDetails || !parsedResult.meaning || !Array.isArray(parsedResult.conversations)) {
@@ -105,8 +123,14 @@ export const generateWithGemini = async (model: string, word: string, scenario: 
 
     return parsedResult;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating content from Gemini API:", error);
+    
+    // Check for specific error types
+    if (error?.status === 403 || error?.message?.includes('Forbidden')) {
+      throw new Error("Access forbidden. This usually means your API key is invalid or doesn't have access to the selected model in your region.");
+    }
+    
     if (error instanceof Error) {
         throw new Error(`Failed to generate learning content: ${error.message}`);
     }
