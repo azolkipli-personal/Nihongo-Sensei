@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Settings, Palette, Cpu, Sparkles, Globe, RefreshCw, Download, Upload, Check, AlertCircle } from 'lucide-react';
-import { fetchOllamaModels } from '../services/llm/ollama';
-
+import { X, Settings, Palette, Cpu, Sparkles, Download, Upload, Check } from 'lucide-react';
 const SettingsSidebar = ({ isOpen, onClose, onSave, currentSettings }) => {
   const [settings, setSettings] = useState(currentSettings);
-  const [ollamaModels, setOllamaModels] = useState([]);
-  const [isFetchingModels, setIsFetchingModels] = useState(false);
-  const [fetchError, setFetchError] = useState(null);
   const [importError, setImportError] = useState(null);
   const fileInputRef = useRef(null);
 
@@ -28,31 +23,10 @@ const SettingsSidebar = ({ isOpen, onClose, onSave, currentSettings }) => {
     setSettings(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleServiceChange = (service) => setSettings(prev => ({ ...prev, service }));
   const handleThemeChange = (theme) => setSettings(prev => ({ ...prev, theme }));
   const handleColorThemeChange = (colorTheme) => setSettings(prev => ({ ...prev, colorTheme }));
 
   const handleSave = () => onSave(settings);
-
-  const handleFetchModels = async () => {
-    setIsFetchingModels(true);
-    setFetchError(null);
-    try {
-      const models = await fetchOllamaModels(settings.ollamaUrl);
-      if (models.length > 0) {
-        setOllamaModels(models);
-        if (!settings.ollamaModel || !models.includes(settings.ollamaModel)) {
-          setSettings(prev => ({ ...prev, ollamaModel: models[0] }));
-        }
-      } else {
-        setFetchError("No models found. Ensure Ollama is running.");
-      }
-    } catch (error) {
-      setFetchError("Could not connect to Ollama server.");
-    } finally {
-      setIsFetchingModels(false);
-    }
-  };
 
   const handleExportSettings = () => {
     const jsonString = JSON.stringify(settings, null, 2);
@@ -181,113 +155,34 @@ const SettingsSidebar = ({ isOpen, onClose, onSave, currentSettings }) => {
                   <span>AI Engine</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => handleServiceChange('gemini')}
-                    className={`p-3 rounded-xl border-2 transition-all font-bold text-sm flex items-center justify-center gap-2 ${
-                      settings.service === 'gemini' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400'
-                    }`}
+                <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4">
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Gemini API Key</label>
+                    <input
+                      type="password"
+                      name="geminiApiKey"
+                      value={settings.geminiApiKey || ''}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:border-primary transition-all text-sm text-slate-900 dark:text-white"
+                      placeholder="Enter your Gemini API key..."
+                    />
+                    <p className="text-[10px] text-slate-400">
+                      Get a free key at{' '}
+                      <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                        aistudio.google.com
+                      </a>
+                    </p>
+                  </div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Model Selection</label>
+                  <select
+                    name="geminiModel"
+                    value={settings.geminiModel}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:border-primary transition-all text-sm text-slate-900 dark:text-white"
                   >
-                    <Sparkles className="w-4 h-4" />
-                    Gemini
-                  </button>
-                  <button
-                    onClick={() => handleServiceChange('ollama')}
-                    className={`p-3 rounded-xl border-2 transition-all font-bold text-sm flex items-center justify-center gap-2 ${
-                      settings.service === 'ollama' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400'
-                    }`}
-                  >
-                    <Globe className="w-4 h-4" />
-                    Ollama
-                  </button>
+                    {geminiModelOptions.map(model => <option key={model} value={model}>{model}</option>)}
+                  </select>
                 </div>
-
-                <AnimatePresence mode="wait">
-                  {settings.service === 'gemini' ? (
-                    <motion.div
-                      key="gemini-config"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4"
-                    >
-                      <div className="space-y-2">
-                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Gemini API Key</label>
-                        <input
-                          type="password"
-                          name="geminiApiKey"
-                          value={settings.geminiApiKey || ''}
-                          onChange={handleChange}
-                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:border-primary transition-all text-sm text-slate-900 dark:text-white"
-                          placeholder="Enter your Gemini API key..."
-                        />
-                        <p className="text-[10px] text-slate-400">
-                          Get a free key at{' '}
-                          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                            aistudio.google.com
-                          </a>
-                        </p>
-                      </div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Model Selection</label>
-                      <select
-                        name="geminiModel"
-                        value={settings.geminiModel}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:border-primary transition-all text-sm text-slate-900 dark:text-white"
-                      >
-                        {geminiModelOptions.map(model => <option key={model} value={model}>{model}</option>)}
-                      </select>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="ollama-config"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4"
-                    >
-                      <div className="space-y-2">
-                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Server URL</label>
-                        <input
-                          type="text"
-                          name="ollamaUrl"
-                          value={settings.ollamaUrl}
-                          onChange={handleChange}
-                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:border-primary transition-all text-sm text-slate-900 dark:text-white"
-                          placeholder="http://localhost:11434"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Select Model</label>
-                        <div className="flex gap-2">
-                          <select
-                            name="ollamaModel"
-                            value={settings.ollamaModel}
-                            onChange={handleChange}
-                            disabled={ollamaModels.length === 0 || isFetchingModels}
-                            className="flex-grow px-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:border-primary transition-all text-sm disabled:opacity-50 text-slate-900 dark:text-white"
-                          >
-                            {ollamaModels.length === 0 && <option value="">Fetch models...</option>}
-                            {ollamaModels.map(model => <option key={model} value={model}>{model}</option>)}
-                          </select>
-                          <button
-                            onClick={handleFetchModels}
-                            disabled={isFetchingModels}
-                            className="p-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:opacity-90 transition-all disabled:opacity-50"
-                          >
-                            <RefreshCw className={`w-4 h-4 ${isFetchingModels ? 'animate-spin' : ''}`} />
-                          </button>
-                        </div>
-                      </div>
-                      {fetchError && (
-                        <div className="flex items-center gap-2 text-red-500 text-[10px] font-bold uppercase tracking-wider">
-                          <AlertCircle className="w-3 h-3" />
-                          {fetchError}
-                        </div>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </section>
             </div>
 

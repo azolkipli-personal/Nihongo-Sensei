@@ -10,7 +10,6 @@ import ReviewPage from './components/ReviewPage';
 import SettingsSidebar from './components/SettingsSidebar';
 
 import { generateWithGemini } from './services/llm/gemini';
-import { generateWithOllama } from './services/llm/ollama';
 
 const themeColors: Record<string, { primary: string; secondary: string; light: string; background: string; darkBackground: string; darkLight: string }> = {
   sky: { primary: '#38bdf8', secondary: '#2c3e50', light: '#e0f2fe', background: '#f0fdf4', darkBackground: '#082f49', darkLight: '#0c4a6e' },
@@ -31,10 +30,7 @@ const App = () => {
   
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settings, setSettings] = useState({
-    service: 'gemini',
     geminiModel: 'gemini-3-flash-preview',
-    ollamaModel: '',
-    ollamaUrl: 'http://localhost:11434',
     theme: 'light',
     colorTheme: 'sky',
   });
@@ -129,11 +125,6 @@ const App = () => {
   };
 
   const handleGenerate = async (words: string[], scenario: string, cefrLevel: string) => {
-    if (settings.service === 'ollama' && (!settings.ollamaUrl || !settings.ollamaModel)) {
-      setError("Ollama is selected, but the server URL is missing or no model is selected. Please configure it in Settings.");
-      return;
-    }
-    
     isCancelledRef.current = false;
     setIsLoading(true);
     setError(null);
@@ -149,12 +140,7 @@ const App = () => {
       try {
         setLoadingMessage(words.length > 1 ? `Generating ${i + 1} of ${words.length}: "${word}"` : `Generating content for "${word}"...`);
 
-        let generatedResult;
-        if (settings.service === 'gemini') {
-            generatedResult = await generateWithGemini(settings.geminiModel, word, scenario, cefrLevel);
-        } else {
-            generatedResult = await generateWithOllama(settings.ollamaModel, word, scenario, settings.ollamaUrl, cefrLevel);
-        }
+        const generatedResult = await generateWithGemini(settings.geminiModel, word, scenario, cefrLevel);
         
         setResults(prevResults => [...(prevResults || []), generatedResult]);
       } catch (err) {
