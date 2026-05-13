@@ -211,6 +211,23 @@ const SettingsSidebar = ({ isOpen, onClose, onSave, currentSettings }) => {
                       exit={{ opacity: 0, y: -10 }}
                       className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4"
                     >
+                      <div className="space-y-2">
+                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Gemini API Key</label>
+                        <input
+                          type="password"
+                          name="geminiApiKey"
+                          value={settings.geminiApiKey || ''}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:border-primary transition-all text-sm text-slate-900 dark:text-white"
+                          placeholder="Enter your Gemini API key..."
+                        />
+                        <p className="text-[10px] text-slate-400">
+                          Get a free key at{' '}
+                          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                            aistudio.google.com
+                          </a>
+                        </p>
+                      </div>
                       <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Model Selection</label>
                       <select
                         name="geminiModel"

@@ -48,8 +48,7 @@ const App = () => {
         const savedSettings = localStorage.getItem('kaiwa-renshuu-settings');
         if (savedSettings) {
             const parsedSettings = JSON.parse(savedSettings);
-            const { geminiApiKey, ...rest } = parsedSettings;
-            setSettings(prev => ({...prev, ...rest}));
+            setSettings(prev => ({...prev, ...parsedSettings}));
         }
     } catch (e) {
         console.error("Failed to parse settings from localStorage", e);
@@ -77,10 +76,9 @@ const App = () => {
   }, [settings.colorTheme, settings.theme]);
 
   const handleSaveSettings = (newSettings: any) => {
-    const { geminiApiKey, ...safeSettings } = newSettings;
-    setSettings(safeSettings);
+    setSettings(newSettings);
     try {
-        localStorage.setItem('kaiwa-renshuu-settings', JSON.stringify(safeSettings));
+        localStorage.setItem('kaiwa-renshuu-settings', JSON.stringify(newSettings));
     } catch (e) {
         console.error("Failed to save settings to localStorage", e);
     }

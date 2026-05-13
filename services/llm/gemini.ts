@@ -61,14 +61,35 @@ const responseSchema = {
 
 
 let aiClient: GoogleGenAI | null = null;
+let cachedUserKey: string | null = null;
+
+function getUserApiKey(): string | null {
+  // Check env var first (build-time, may be empty)
+  const envKey = process.env.GEMINI_API_KEY;
+  if (envKey) return envKey;
+  
+  // Check localStorage for user-configured key (settings)
+  try {
+    const settings = localStorage.getItem('kaiwa-renshuu-settings');
+    if (settings) {
+      const parsed = JSON.parse(settings);
+      if (parsed.geminiApiKey) return parsed.geminiApiKey;
+    }
+  } catch (e) {
+    // ignore parse errors
+  }
+  
+  return null;
+}
 
 function getAiClient(): GoogleGenAI {
-  if (!aiClient) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is not defined in the environment. Please check your settings.");
-    }
-    aiClient = new GoogleGenAI({ apiKey });
+  const key = cachedUserKey || getUserApiKey();
+  if (!key) {
+    throw new Error("Gemini API key not found. Please add your key in Settings ⚙️");
+  }
+  if (!aiClient || cachedUserKey !== key) {
+    cachedUserKey = key;
+    aiClient = new GoogleGenAI({ apiKey: key });
   }
   return aiClient;
 }
