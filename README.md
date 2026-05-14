@@ -1,67 +1,42 @@
-# Kaiwa Renshuu (会話練習)
+# Nihongo Sensei (会話練習)
 
-Kaiwa Renshuu (Conversation Practice) is a web-based application designed to help Japanese language learners master new vocabulary and phrases by providing rich, contextual examples. Instead of just giving a definition, this tool generates realistic conversation dialogues based on a scenario you provide, showing you how words are used naturally.
+## Why
 
-## ✨ Features
+Japanese learners hit a wall between "knowing words" and "using words." You memorise vocabulary from WaniKani or Anki, but when it's time to actually speak — in a meeting, at a conbini, with colleagues — the words don't come out naturally. The problem isn't your memory. It's that you've never seen those words in real conversation context. Flashcards show you isolated words. You need to see how they flow together in actual dialogue.
 
-*   **Contextual Learning**: Generates 5 distinct conversation examples for each word or phrase within a user-defined scenario (e.g., "work conversations in an IT engineering company").
-*   **Detailed Vocabulary**: Provides the Kanji, Kana (Hiragana/Katakana), and Romaji for each word, along with a clear English meaning.
-*   **Interactive Furigana**: All Japanese dialogue includes furigana (pronunciation guides over Kanji), which can be crucial for learners.
-*   **Flexible Input**:
-    *   **Manual Entry**: Quickly look up one or more words by typing them in (separated by commas or newlines).
-    *   **File Upload**: Process an entire vocabulary list at once by uploading a `.txt` file.
-*   **Customizable LLM Backend**:
-    *   **Google Gemini**: Use the powerful Gemini models by providing your own API key.
-    *   **Ollama (Local)**: Connect to a local Ollama instance to use models like Llama 3, Mistral, etc., for offline and private generation.
-*   **Practice Mode**: Test your comprehension by independently hiding or showing the Romaji and English translations for the conversation dialogues.
-*   **Session Management**:
-    *   **Export**: Save your generated results (for one or multiple words) to a single JSON file.
-    *   **Review**: Load previously saved JSON files to review your study sessions anytime.
+## What
 
-## 🚀 How to Use
+Nihongo Sensei is a conversation-practice app that generates realistic Japanese dialogues from your vocabulary list. Give it a list of words and a scenario — "casual chat with coworkers" or "ordering at a restaurant" — and it produces natural conversations showing exactly how those words are used in context. Every word gets furigana pronunciation guides, romaji, and English translations.
 
-This is a client-side application that can be run directly in a web browser, making it easy to deploy on platforms like GitHub Pages.
+This was the predecessor to [nihongo-master](https://github.com/azolkipli-personal/nihongo-master) — the spiritual v1 that proved the concept before evolving into a full-featured learning platform.
 
-### 1. Initial Setup: Configure Your Language Model
+## Features
 
-Before you start generating, you need to configure a language model.
+- **Contextual dialogue generation** — 5 distinct conversation examples per word, within a user-defined scenario
+- **Rich vocabulary display** — Kanji, kana, romaji, and English meaning for every word
+- **Interactive furigana** — Toggle pronunciation guides on/off during practice
+- **Flexible input** — Type words manually or upload a `.txt` vocabulary list
+- **Customisable AI backend** — Works with Google Gemini (cloud) or Ollama (local, private)
+- **Practice mode** — Independently show/hide romaji and English to test comprehension
+- **Session management** — Export results to JSON for later review
 
-1.  Click the **gear icon (⚙️)** in the top-right corner to open the **Settings** sidebar.
-2.  Choose your preferred service: **Google Gemini** or **Ollama**.
+## Quick Start
 
-#### For Google Gemini:
-1.  Obtain a free API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
-2.  In the settings sidebar, paste your key into the "Google Gemini API Key" field.
-3.  Choose your desired Gemini model from the dropdown.
-4.  Click "Save and Close". Your key is stored securely in your browser's local storage and is never sent anywhere else.
+Open `index.html` in a browser, or serve with any static file server:
 
-#### For Ollama (Local):
-1.  Ensure you have [Ollama](https://ollama.com/) installed and running on your computer.
-2.  Make sure you have downloaded a model (e.g., run `ollama pull llama3` in your terminal).
-3.  In the settings sidebar, verify the "Ollama Server URL" (the default `http://localhost:11434` is usually correct).
-4.  Click "Fetch Models" to see a list of your installed models.
-5.  Select a model from the dropdown.
-6.  Click "Save and Close".
+```bash
+git clone https://github.com/azolkipli-personal/Nihongo-Sensei
+cd Nihongo-Sensei
+python3 -m http.server 8080
+# Open http://localhost:8080
+```
 
-### 2. Generating Examples
+Configure your AI backend in Settings (⚙️):
+- **Google Gemini**: Get a free API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+- **Ollama**: Install [Ollama](https://ollama.com/) locally and run `ollama pull llama3`
 
-1.  On the **Generator** page, choose your input method:
-    *   **Manual Entry**: Type or paste words/phrases into the text area.
-    *   **File Upload**: Upload a `.txt` file containing your vocabulary list.
-2.  Verify or change the **Scenario / Context** to match your learning goals.
-3.  Click **Generate Examples**. The app will process each word and display the results.
-4.  For long lists, a **Stop Generation** button will appear if you need to cancel the process.
+## Tech Stack
 
-### 3. Reviewing Your Session
-
-*   Use the **"Show: Romaji / English"** buttons to toggle translations for practice.
-*   Click **Export All Results** to save your entire session as a single `.json` file.
-*   Navigate to the **Review** page to upload and view your saved `.json` files at any time.
-
-## 🛠️ Technologies Used
-
-*   **Frontend**: React.js
-*   **Styling**: Tailwind CSS
-*   **Language Models**:
-    *   `@google/genai` for Google Gemini API integration
-    *   Direct API calls to a local Ollama instance
+- **Frontend**: Vanilla HTML/CSS/JS (single-page app)
+- **AI Backends**: Google Gemini API (`@google/genai`), Ollama (local REST API)
+- **Storage**: Browser localStorage (API keys, session data)
