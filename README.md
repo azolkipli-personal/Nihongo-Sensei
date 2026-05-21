@@ -1,5 +1,12 @@
 # Nihongo Sensei (会話練習)
 
+
+<p align="center">
+  <a href="https://github.com/sponsors/azolkipli-personal">
+    <img src="https://img.shields.io/badge/Sponsor-%E2%9D%A4%EF%B8%8F%20jpeigo--slides-DB61A2?style=for-the-badge&logo=github&logoColor=white" alt="Sponsor">
+  </a>
+</p>
+
 ## Why
 
 Japanese learners hit a wall between "knowing words" and "using words." You memorise vocabulary from WaniKani or Anki, but when it's time to actually speak — in a meeting, at a conbini, with colleagues — the words don't come out naturally. The problem isn't your memory. It's that you've never seen those words in real conversation context. Flashcards show you isolated words. You need to see how they flow together in actual dialogue.
